@@ -1,0 +1,181 @@
+import processing.serial.*;
+//allows to send data to the arduino board
+//this is needed so that the data from my laptop can go into the Arduino board
+Serial dataPort;
+//Creates a variable that will store serial data
+//Serial is needed for me to communicate with the Arduino board by a serial connection. In this case it is the wire to the Arduino and my laptop.
+int[] servoANGLES = {90, 90, 90, 90, 90};
+// Inital angle of the servos, once the code starts, the 5 servos turn 90 degrees.
+int numServos = 5;
+//This variable is setting the number of servos im using, which will also be used for the number of sliders
+int sliderWidth = 180;
+//the width of each slider in px (pixels) that goes from left to right
+int sliderHeight = 20;
+//the height of each slider in px (pixels) that goes from top to bottom
+
+void setup() {
+//Setup
+  size(500, 250);
+  //dimensions of the window in px, 500px wide and 250px tall.
+  printArray(Serial.list());
+  //This prints out which port my Arduino is connected to. In this case, it is COM3, so it will always print COM3 in the console. This is needed so that all the data can be transferred correctly thorugh the right port.
+  dataPort = new Serial(this, "COM3", 9600);
+  //The serial port variable "dataPort: will store the serial connection. this will be used to send data to and from the laptop and Arudino.
+  // new Serial() creates a new serial object that controls the communication and port, the "this" is reffering to this Processing document, as it will be sending data from this document to the arduino. The "COM3" sets the port in which data will send, and then the "9600" is the baud rate, which is the speed of communication for the Arduino. As this must match with my arduino code which is also 9600 baud.
+
+}
+
+void draw() {
+//This is the drawing for the interface, for both the sliders and also the colors
+  background(0);
+  //Black background
+  fill(255);
+  //title text color is set to white
+  textSize(14);
+  //Font size is set to 14px (pixels)
+  text("Robotic Arm for Laboratory Purpose", 1, 20);
+  //draws and displays the text and also sets the x and y position
+  text("Yuvraj Singh CS-15 Final Project", 305, 20);
+  //draws and displays the text and also sets the x and y position
+  
+  
+  for (int ServoNum_X = 0; ServoNum_X < numServos; ServoNum_X++) {
+   //A for loop is a loop that is ran a certain number of times
+   //In this case, it is running until 5, I set the servonum as zero for the loop to use that value to know when to stop and to also know which servo is being used.
+   //the < numServos is bascially <5, as the numServos value is declared as 5 at the beggining. servonum++ is for when everytime the for loop is completed, the servonum value is increased by +1
+    int y = 60 + ServoNum_X * 35; 
+    // this line is for the position of each slider on the y-axis, each slider will be 35 pixels apart from each other in a equal distance.
+    
+    //How it is displayed:
+    //when servonum = 0: y = 60 + 0 * 35
+    //y = 60 (The first slider will be displayed at y = 60px)
+    
+    //when servonum = 1: y = 60 + 1 * 35
+    //y = 95 (The second slider will be displayed at y = 95px)
+    
+    //when servonum = 2: y = 60 + 2 * 35
+    //y = 130 (The third slider will be displayed at y = 130px)
+    
+    //when servonum = 3: y = 60 + 3 * 35
+    //y = 165 (The fourth slider will be displayed at y = 165px)
+    
+    //when servonum = 4: y = 60 + 4 * 35
+    //y = 200 (The fifth slider will be displayed at y = 200px)
+  
+  
+  
+    fill(180);
+    //grey background for slider
+    rect(50, y, sliderWidth, sliderHeight);  
+    //creates a rectangle with x and y values given, the y value is the ones that we saw above, it then uses dimensions that were declared at the beginning of the code (sliderWidth = 180px & sliderHeight= 20px)
+  
+    int sliderPos = (int)map(servoANGLES[ServoNum_X], 0, 180, 0, sliderWidth);
+    //this is ths position of the slider that will move, the map() function is formatted like this: map(value, fromLow, fromHigh, toLow, toHigh)
+    // the value is the angle of one servo, the fromlow part is your lowest value that your servo motor can achieve; which is zero, fromHigh is your highest value from the angle which is 180.
+    //toLow is the lowest value you want to/ convert to, in this line, as we are drawing the length of the rectangle for each time it is drawn, our lowest will be zero.
+    //toHigh is your value that is your highest, which is the sliderWidth, as we do not want the blue rectangle to be drawn off the slider.
+    
+    fill(5, 5, 100);
+    //makes slider blue  
+    rect(50, y, sliderPos, sliderHeight);
+    //creates the recatngle to show how "filled" the other slider is, this is the rectangle that will be moved to determine the angles.
+  
+    
+    
+    
+   
+    fill(255);
+    //text color is white
+    text(servoANGLES[ServoNum_X] + "°", 240, y + 15);
+    //draws a text of the current servo angle on the right side of each slider, it is then added with a degree sign and also has the respected x and y coordinates, the x values are the same but the y value is added by +15 because then the angles would not be beside the sliders
+    
+    
+    //This is ALL under a for loop, once one lap is completed, the servonum variable is added by +1 and it all repeats again until the servonum is < 5
+
+}
+
+  fill(255);
+  //this is for labelling each slider, as i set the text color to white
+  textAlign(LEFT);
+  //aligns the text to the left side
+
+ //These are labels for each of the 5 servo motors and their desired x and y coordinates on the window
+  text("BASE", 1, 75);
+  text("Joint #1", 1, 110);
+  text("Joint #2", 1, 145);
+  text("Joint #3", 1, 180);
+  text("Joint #4", 1, 215);
+    
+
+  Data();
+  //Calls a function. The use for it is stated below
+}
+
+void mouseDragged() {
+//mouseDragged() is a built in function that runs a code whenever you hold down the mouse button and drag/move the mouse
+  for (int ServoNum_Y = 0; ServoNum_Y < numServos; ServoNum_Y++) {
+  //Another for loop for repeating the code 5 times for each servo
+    int y = 60 + ServoNum_Y * 35;
+    //setting the y value, this is the same line of code in line 46. This is repeated so that I can use the y value and see if the mouse is in the rectangular bar.
+    
+    //An if statement that is for when the mouse is in the dimensions of the sliders and when they are dragged
+    if (mouseY > y && 
+    //First condition that needs to be met: If the y coordinate of the mouse on the window is greater than the "y", the "y" value will be different each and every time because of the code in line 118. This part of the if statement is saying if the y value of the mouse cursor is greater, it is underneath the slider. The greater your y value is, the more lower you are on the screen. 
+        mouseY < y + sliderHeight && 
+        //This next condition is for when it needs to be kept between the slider, it is saying that the y value for the mouse is the "y" plus the height of the slider. the "y" value for the rectangles are for the top left corner of the rectangle. To get the entire distance from the top of the window to the bottom part of the slider. So far, we have stated that the cursor needs to be between the sliders for it to be true. 
+        mouseX > 50 && 
+        //The next condition is when the x value for the mouse cursor is greater than 50. If you plot the sliders on a xy plane, you will see that the left corner is at 50. This was a good way to visualize and understand about the exact placement I wanted the mouse cursor to be, the only thing is that the y axis needs to be going down, as the higher y-value, the lower you go on the window.
+        //The x value for the mouse cursor needs to be greater than 50, basically meaning that it needs to be above 50, this isnt what we want but we will add our next limit in the following line.
+        mouseX < 50 + sliderWidth) {
+        //This is the final limit for the x values, as I did the same thing I did for the height of the slider. I did 50, as that is the left corners of the slider plus the entire slider width/length. This value basically gave the value of the right corner of the slider. As then I set the next condition to be that the mouse x value needs to be lower than 50 + the slider width
+        
+        //This entire if statement is basically setting the dimensions of the sliders and delaring them that if the mouse is dragged in there, do the following
+        
+      int mapped_angle = (int)map(mouseX, 50, 50 + sliderWidth, 0, 180);
+      //the map() angle has the format like this: map(value, fromLow, fromHigh, toLow, toHigh)
+      //You can see the same format in the map() function I used, as the value that i am using will be the mouse x value for where the mouse is/how far the slider got dragged, the fromLow is the lowest value that you origionally used which is the beginning of the slider (50), and then the highest value from the origional value (50+ Slider Width = very end of slider)
+      //It then maps those given values to your new value, the toLow is the lowest value in your new range which is 0 degrees, and then the toHigh is the highest value in your range which is 180.
+      //For the map() function, it is basically a ratio. For instance, the x value for the left side of the slider is 50, and that is in ratio to 0 degrees. And then the right side of the slider is 50 plus the sliderwidth which is in ratio to 180
+      //With the ratio, it converts the mouse x value to an apropriate degree, that is set as an integer
+      servoANGLES[ServoNum_Y] = constrain(mapped_angle, 0, 180);
+      //This sets the angle of 1 servo depending on the servo number, constrain keeps the angle between the lowest and the highest value which was done in this line. As my constraints are 0 degrees to 180 degrees, The mapped_value is the value that is being kept in the range of the set values of low to high.
+      //As the ServoNum_Y value keeps changing, the array will set its new angle as its own variable.
+      //For example, if the angles are (90,45,60,120,180).
+      //the ServoNum_Y will keep changing value and setting each number as its own angle. It would look like this:
+      //servoANGLES[0]=90
+      //servoANGLES[1]=45
+      //servoANGLES[2]=60
+      //servoANGLES[3]=120
+      //servoANGLES[4]=180
+      
+      
+      
+    }
+  }
+}
+
+
+void Data() {
+//function
+  String data = "";
+  //empty string that will store data for all 5 angles for each servo
+  for (int ServoNum_Z = 0; ServoNum_Z < numServos; ServoNum_Z++) {
+  //Another for loop for each of the 5 servos
+    data += servoANGLES[ServoNum_Z];
+    //adds each angle depending on the servo number. As shown above, depending on the stored variable, each angle is added to the empty string.
+    //As we stated above, that the array servoANGLES[0-4] have their own value for each number, whatever value that is gets added to the data. It would look like this once all the angles are added to the data:
+    //data = "904560120180"
+    //to seperate each angle and also to make sure its in the right format so the arduino code can translate it, we need to add commas after each angle. Which will be executed in the next line.
+    if (ServoNum_Z < numServos - 1) 
+      data += ",";
+    //after every time a new angle is added, a comma is added to the end of each angle.
+    //for example: If the ServoNum_Z is equal to zero, that means that my angle is 90. It gets added to the string "data" and then sees the if statement. the numServos is 5, and the last servo is the number 4. So i minus the number of servos by 1 to get 4 as my value.
+    //In this instance, the if statement is met, as 0 < 4 is true. it then adds a comma to the string.
+    //For example, if the servoANGLES array is at 0, the angle is 90. It then gets added to the string so the data value would look like this" "90", and then goes through the if condition. If it is true, then it adds a comma so then the updated data value is "90,"
+    //It does this for each and every angle until the last one, the maximum value for the final servo is 4. as 4 is not greater than 4, so Processing just sees this as false. It then doesnt add another comma, so the final data will be displayed as this: "90,45,60,120,180"
+  }
+  dataPort.write(data + "\n");
+  //This is the line to end the data to the arduino board, through our serial port that we have stated as dataPort. 
+  //The data that will be sent is our "data" string that has all our 5 servo angles, the "\n" is for when transmitting data to arduino, the \n tells it that it is the end of the message.
+
+}

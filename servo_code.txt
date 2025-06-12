@@ -1,0 +1,120 @@
+//THIS CODE IS FOR THE SERVO DRIVER MODULE TO READ THE VALUES THAT ARE GIVEN THROUGH THE ARDUINO BOARD
+
+#include <Wire.h>
+//allows communication with I2C devices (in this case the servo driver module), the servo driver uses I2C to communicate with the board and code
+#include <Adafruit_PWMServoDriver.h>
+//adds the library for the operations and commands when using the PCA9685(servo driver)
+
+Adafruit_PWMServoDriver driver = Adafruit_PWMServoDriver();
+//a variable that stores the servo driver - "driver"
+
+
+//Pulses and ticks is what makes the servo driver read on how much the servos should turn,
+// For Example:
+// pulse of 150 ticks is 0 degrees on the servo
+// pulse of 375 ticks is 90 degrees on the servo
+// pulse of 600 ticks is 180 degrees on the servo
+
+#define SERVOMIN  150 
+//This is defining the MININUM value on how much the servo can turn, so a pulse of 150 ticks is 0 degrees
+#define SERVOMAX  600
+//This is defining the MAXIMUM value on how much the servo can turn, so a pulse of 600 ticks is 180 degrees
+
+//This part of the code is important, as this is bascially giving the restrictions so the servo driver will read any values between a pulse of 0-600 in ticks. 0-600 / 0-180 degrees
+
+//The servo driver only uses values between 0-600, anything more than 600 will mean that the servo will exceed 180 degrees. Servo motors are only designed for 180 degrees.
+
+int angles[5] = {90, 90, 90, 90, 90}; 
+
+//This is the inital angle of the servos, this sets all the servos (In this case 5 servos) to 90 degrees at start.
+
+void setup() {
+  //this is the setup of the servos and servo drivers before it starts taking data and transmitting it
+  Serial.begin(9600);
+  // serial refers to the port that is in the arduino, so any data that is given from my laptop will be transferred into the wire and in the Arduino board
+  //Serial.begin is setting the communication speed to 9600 baud (bits per second). This baud speed is needed so the arduino board can communicate with any data that my laptop will be giving
+  driver.begin();
+  //This starts the servo driver to be ready in use, as this begins the I2C communication that was talked about at the beginning of the code
+  driver.setPWMFreq(60);
+  //hertz is a frequency in which how fast or often the servos recieve control signals.
+  //this sets the frequency to 60 hertz, as this is the standard for servos.
+  //If I increase the frequency, the servo will get confused and will not operate to its best.
+  //If I decrease the frequency, the servo will take longer to respond and also may become slow and jittery. As the communication speed is lacking and isnt efficient
+  delay(10);
+  //a small delay to give time for the setup to initialize
+}
+
+void loop() {
+//This is the main code to make the servo turn
+  if (Serial.available()) {
+  //If statement that basically is saying "If there is serial data availabe do this", if there isnt then the servo wont turn.
+    String data = Serial.readStringUntil('\n');
+    //Reads data from the laptop (Each servo angle value). the \n is just indicating to end the reading and to store the 5 values for each servo into a string called "data"
+    data.trim(); 
+    //a command that basically removes any extra readings that the computer gave the arduino. This is basically isolating everything so that we are left with only the 5 servo angles, (This removes the "/n" so that only the number angles with the commas are left. Ex: 90,120,30,60,180)
+
+
+    //Main function for this code is to 
+    int servo = 0;
+    //sets which servo is being used (5 servos) - servo = 0 is the 1st servo, servo = 1 is the 2nd servo, servo = 2 is the 3rd servo, servo = 3 is the 4th servo, and servo = 4 is the 5th servo.
+    while (data.length() > 0 && servo < 6) {
+    //data.length repersents the amount of characters in the data. For example if I put in 90 degrees for one servo, 45 degrees for the 2nd servo, 30 degrees for the 3rd servo, 120 degrees for 4th servo, and 180 for the 5th servo the data will be stored like this: data = (90,45,30,120,180), The total number of characters in the data wll be 16.
+    // data.length() > 0 is just saying "While the length of characters in the string: "data" is more than 0, keep running the code until it is not.
+    //note: && in C++ is a operation which basically means that if one side of the conditional statement is false, then the whole thing is false. I put this so if the index reaches 5 it will not run, and also if the length of characters in the string data is 0 it will stop working.
+      int commaIndex = data.indexOf(',');
+      //finds the first comma in the data, from my processing code, I formatted the servo angles to be: angle, angle, angle, angle, angle.
+      //.indexof helps to locate the first comma in the data, for example: if my data for the 5 servos are (90, 45, 120, 180, 60) and these values are stored in the string "data" on line 51,the indexof gives me the value of where the character is. You can adjust what character you are trying to find in the brackets, in this case im locating the comma that is in the data. Using my example, the comma is the 2nd character, the number of characters are numbered starting from zero.
+      //So, in the example: (90, 45, 120, 180, 60), the data.indexOf(',') finds the comma and sets the character number into the variable "commaIndex", the comma is the 2nd character in the data, as 9 is zero 0 is one and then the comma is 2
+      String valueStr;
+      //creates a string variable: "valueStr"
+
+      if (commaIndex != -1) {
+      //If statement that means that if the commaIndex value is not equal to -1, run the code that is underneath.
+      //i put -1 because the commaIndex will always be above 0, unless some certain condions are met.
+      
+        valueStr = data.substring(0, commaIndex);
+        //.substring() is a function that lets me extract part of a string from the entire thing, you put your desired start and stop parts in the brackets to snip and take out the desired part of the string you want. In this case, I have used the function for the data value which has all of the angles for the 5 servos, this line of code helps to actually seperate each angle into its own variable. In the brackets I have stated my start and stop, 0 to the commaIndex value.
+        //This takes the characters that are from 0 to the commaIndex in the string. For example: if our comma index was 2 stated above, and our data is still (90, 45, 120, 180, 60). It would extract all the characters from 0 to 2(the comma). So it would extract 90 from the string. The extracted value will be then put into a variable called valueStr.
+      } else {
+        //This else statement is targetting that if the comma index is -1, that means that there are no other commas in the data. This part of the code was written for when the data is just left with 1 angle. On line 64 that line of code is for locating the comma and setting it as commaIndex. When using the .indexOf() function, if there isnt a value to be found, it will just return -1.
+        valueStr = data;
+        //The extracted value will be then put into a variable called valueStr.
+      }
+
+      angles[servo] = valueStr.toInt();
+      //creates an array that converts each servo angle into a integer
+      //An array is used to bsacially have multiple variables under one container or bucket, in this case all the variables are integers and each one is seperated into its own corresponding angle value.
+      //this array is our final angle value which will be used to translate the integer value into a pulse for the servo driver to understand
+
+
+      //this part of the code is VERY important, probably the most important piece for the whole entire thing to work. This is what removes the already read angles and proceeds to the next reading for the servo angle.
+      if (commaIndex != -1) {
+      //if the commaIndex is not equal to -1, meaning, if the comma index is above 0 then do this..
+        data = data.substring(commaIndex + 1);
+        //Because after every comma, there will be a new angle value, I put plus 1 to change the comma index value to the next number.
+        //For example, if we use the data (90,45,120,180,60), we know that our first value for the comma index is 2. Once the program reaches to this area, it will add one to the comma index to start taking the data from the next angle. It is extracted through the .substring() function, as then the new data will be set in the data variable and it would look like this: (45,120,180,60)
+        //When using a substring, you do not need to explicitly state your range. If you put in just one value then it will take characters from the value that you set to the end of the string.
+      } else {
+        data = "";
+        //This else statement is for when there are no more commas to be read, that means that there is just one angle left in the string. I put it as an empty string so that in the while loop, the condition of data.length will not be met. This will end the while loop and cause it to not run again.
+      }
+
+      servo++; 
+      //Adds +1 to the servo variable that was stated right above the while loop, this new servo value is then taken down the same process again. 
+    }
+
+  
+    for (int ServoNumber = 0; ServoNumber < 6; ServoNumber++) {
+    //A for loop is used to keep running a loop a certain number of times, in this case im making it run 5 times. As this part of the code makes the angle values translate to the servo driver module. The servo number starts at 0, indicating that it is talking about 1 out of 5 servos, and then the limit to how many times I want this code to repeat, then lastly to add +1 to the servo number to move on to the next servo
+      int angle = map(angles[ServoNumber], 0, 180, SERVOMIN, SERVOMAX);
+      //a variable named "angle" that will be our final angle value for the servo, the map() function converts an integer value to the proper pulse in which the servo driver can translate.
+      //The format for the map() function is to include your  lowest and highest "from" values and also your lowest to highest "to" values. In this map() function, it takes the input angle that was given, (0–180) and scales it to the corresponding pulse (150–600 or SERVOMIN and SERVOMAX), It is bascially a ratio.
+
+
+      driver.setPWM(ServoNumber, 0, angle);
+      //This code is for driving each servo, the "driver" was the variable that kept the servo driver module for use. .setPWM() sets the desired pulse, the format for the function in the brackets is: (Pin#, start value, end value)
+      //the ServoNumber is for each servo, and the 0 is for keeping the pulse at nothing, the less pulse you have, the less the servo turns. Then the angle is our desired angle that we want which has now been put into a pulse for the servo driver module to read.
+      //Then the loop repeats, the ServoNumber increases to 1 and it does the whole thing again. Until, it reaches to 6.
+    }
+  }
+}

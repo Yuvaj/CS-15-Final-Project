@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Robotic Arm Project</title>
+    <link rel="stylesheet" href="CS-15.css">
+</head>
+<body>
+    <div class="border"></div>
+    <div class="border1"></div>
+    <h3>You are on the HOME page</h3>
+
+    <nav>
+        <div class="nav-link"><a href="CS-15_Robotic Arm.html">Home</a></div>
+        <div class="nav-link"><a href="Section1.html">Section 1</a></div>
+        <div class="nav-link"><a href="Section2.html">Section 2</a></div>
+        <div class="nav-link"><a href="Section3.html">Section 3</a></div>
+        <div class="nav-link"><a href="Section4.html">Section 4</a></div>
+        <div class="nav-link"><a href="Section5.html">Section 5</a></div>
+        <div class="nav-link"><a href="Section6.html">Section 6</a></div>
+        <div class="nav-link"><a href="Code.html">Code</a></div>
+    </nav>
+
+    <div class="title">
+        <h1>Code Used for Robotic Arm</h1>
+        <h2>Yuvraj Singh – Final Project</h2>
+    </div>
+
+    <div class="underline"></div>
+
+    <div class="content">
+        <h3>Report: </h3>
+        <embed src="CS-15 FINAL PROJECT REPORT - Yuvraj Singh.pdf" type="application/pdf" width="100%" height="600px" />
+
+
+
+        <h3>Arduino Code:</h3>
+        <p>This code communicates between the Arduino Uno and the PCA9685 servo driver module via I2C, interprets incoming angle data from Processing, and moves five servos accordingly. Each servo receives a pulse mapped between 150 and 600 (ticks) corresponding to angles between 0° and 180°.</p>
+        <p><a href="servo_code.txt" download>Download Arduino Code</a></p>
+
+        <h3>Processing Code:</h3>
+        <p>The Processing program creates a GUI with sliders for each servo, allowing the user to drag and control their angles from the computer. These angles are then transmitted to the Arduino via a serial connection at 9600 baud rate.</p>
+        <p><a href="processing_code.txt" download>Download Processing Code</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Robotic Arm Project</title>
+    <link rel="stylesheet" href="CS-15.css">
+    <style>
+        .code-block {
+            background-color: #1e1e1e;
+            color: #00ffcc;
+            padding: 15px;
+            margin: 20px auto;
+            width: 90%;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="border"></div>
+    <div class="border1"></div>
+    <h3>You are on the CODE page</h3>
+
+    <nav>
+        <div class="nav-link"><a href="CS-15_Robotic Arm.html">Home</a></div>
+        <div class="nav-link"><a href="Section1.html">Section 1</a></div>
+        <div class="nav-link"><a href="Section2.html">Section 2</a></div>
+        <div class="nav-link"><a href="Section3.html">Section 3</a></div>
+        <div class="nav-link"><a href="Section4.html">Section 4</a></div>
+        <div class="nav-link"><a href="Section5.html">Section 5</a></div>
+        <div class="nav-link"><a href="Section6.html">Section 6</a></div>
+    </nav>
+
+    <div class="title">
+        <h1>Code Used for Robotic Arm</h1>
+        <h2>Yuvraj Singh – Final Project</h2>
+    </div>
+
+    <div class="underline"></div>
+
+    <div class="content">
+        <h3>Arduino Code:</h3>
+        <div class="code-block">
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_PWMServoDriver.h&gt;
+
+Adafruit_PWMServoDriver driver = Adafruit_PWMServoDriver();
+#define SERVOMIN  150
+#define SERVOMAX  600
+int angles[5] = {90, 90, 90, 90, 90};
+
+void setup() {
+  Serial.begin(9600);
+  driver.begin();
+  driver.setPWMFreq(60);
+  delay(10);
+}
+
+void loop() {
+  if (Serial.available()) {
+    String data = Serial.readStringUntil('\n');
+    data.trim();
+    int servo = 0;
+    while (data.length() > 0 && servo < 6) {
+      int commaIndex = data.indexOf(',');
+      String valueStr = (commaIndex != -1) ? data.substring(0, commaIndex) : data;
+      angles[servo] = valueStr.toInt();
+      data = (commaIndex != -1) ? data.substring(commaIndex + 1) : "";
+      servo++;
+    }
+    for (int ServoNumber = 0; ServoNumber < 6; ServoNumber++) {
+      int angle = map(angles[ServoNumber], 0, 180, SERVOMIN, SERVOMAX);
+      driver.setPWM(ServoNumber, 0, angle);
+    }
+  }
+}
+        </div>
+
+        <h3>Processing Code:</h3>
+        <div class="code-block">
+import processing.serial.*;
+Serial dataPort;
+int[] servoANGLES = {90, 90, 90, 90, 90};
+int numServos = 5;
+int sliderWidth = 180;
+int sliderHeight = 20;
+
+void setup() {
+  size(500, 250);
+  printArray(Serial.list());
+  dataPort = new Serial(this, "COM3", 9600);
+}
+
+void draw() {
+  background(0);
+  fill(255);
+  textSize(14);
+  text("Robotic Arm for Laboratory Purpose", 1, 20);
+  text("Yuvraj Singh CS-15 Final Project", 305, 20);
+
+  for (int i = 0; i < numServos; i++) {
+    int y = 60 + i * 35;
+    fill(180);
+    rect(50, y, sliderWidth, sliderHeight);
+    int sliderPos = (int)map(servoANGLES[i], 0, 180, 0, sliderWidth);
+    fill(5, 5, 100);
+    rect(50, y, sliderPos, sliderHeight);
+    fill(255);
+    text(servoANGLES[i] + "°", 240, y + 15);
+  }
+  fill(255);
+  textAlign(LEFT);
+  text("BASE", 1, 75);
+  text("Joint #1", 1, 110);
+  text("Joint #2", 1, 145);
+  text("Joint #3", 1, 180);
+  text("Joint #4", 1, 215);
+  Data();
+}
+
+void mouseDragged() {
+  for (int i = 0; i < numServos; i++) {
+    int y = 60 + i * 35;
+    if (mouseY > y && mouseY < y + sliderHeight && mouseX > 50 && mouseX < 50 + sliderWidth) {
+      int mapped_angle = (int)map(mouseX, 50, 50 + sliderWidth, 0, 180);
+      servoANGLES[i] = constrain(mapped_angle, 0, 180);
+    }
+  }
+}
+
+void Data() {
+  String data = "";
+  for (int i = 0; i < numServos; i++) {
+    data += servoANGLES[i];
+    if (i < numServos - 1) data += ",";
+  }
+  dataPort.write(data + "\n");
+}
+        </div>
+    </div>
+</body>
+</html>
+
+
+<img src="flowhcart.png" alt="flowchart">
